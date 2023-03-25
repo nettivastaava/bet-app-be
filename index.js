@@ -5,7 +5,7 @@ const app = express()
 const cors = require('cors')
 const mongoose = require('mongoose')
 
-const { results, players } = require('./utils')
+const { results } = require('./utils')
 const Player = require('./models/player')
 const url = process.env.MONGODB_URI
 
@@ -34,14 +34,16 @@ app.get('/', (req, res) => {
 })
 
 app.get('/api/players', (req, res) => {
-  res.json(players)
+  Player.find({}).then(players => {
+    res.json(players.map(p => p.toJSON()))
+  })
 })
 
 app.get('/api/results', (req, res) => {
   res.json(results)
 })
 
-app.post('/api/players', (request, response) => {
+app.post('/api/players', (request, response, next) => {
   const body = request.body
   console.log("body ", body)
   const newPlayer = new Player({
@@ -52,7 +54,7 @@ app.post('/api/players', (request, response) => {
   newPlayer.save().then(result => {
     console.log('new player saved!')
     mongoose.connection.close()
-  })
+  }).catch(error => next(error))
 })
 
 const PORT = 3001
