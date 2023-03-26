@@ -29,6 +29,10 @@ const playerSchema = new mongoose.Schema({
         type: Number,
         default: 99
     },
+    points_list: {
+        type: Array,
+        default: Array(48).fill(undefined)
+    },
     guesses: [{
         match: {
             type: String,

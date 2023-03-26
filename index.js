@@ -11,9 +11,9 @@ const url = process.env.MONGODB_URI
 
 mongoose.set('strictQuery', false)
 
-console.log('connecting to', url)
+
 mongoose.connect(url)
-  .then(result => {    
+  .then(result => {
     console.log('connected to MongoDB') 
   })  
   .catch((error) => {    
@@ -25,8 +25,62 @@ app.use(cors())
 
 app.use(express.json())
 
+const calculateScore = (guess, actual, player) => {
+  if (guess.h === actual.h && guess.a === actual.a) {
+    player.threes += 1
+    return 3
+  } else if (guess.h > guess.a && actual.h > actual.a) {
+    if (guess.h === actual.h || guess.a === actual.a) {
+      player.twos += 1
+      return 2
+    }
+    player.ones +=1
+    return 1
+  } else if (guess.h < guess.a && actual.h < actual.a) {
+    if (guess.h === actual.h || guess.a === actual.a) {
+      player.twos += 1
+      return 2
+    }
+    player.ones +=1
+    return 1
+  } else if (guess.h === actual.h || guess.a === actual.a || (guess.h === guess.a && actual.h === actual.a)) {
+    player.ones +=1
+    return 1
+  }
+
+  return 0
+}
+
+const updatePlayerScores = player => {
+  const playerPoints = [...player.points_list]
+  let updated = false
+  results.forEach((r, index) => {
+    if (!playerPoints[index]) {
+      updated = true
+      playerPoints[index] = calculateScore(player.guesses[index], r, player)
+    }
+  })
+  if (updated) {
+    player.points_list = playerPoints
+
+    try {
+      player.save()
+    } catch (error) {
+      console.log('something went wrong')
+    }
+  }
+}
+
 // console.log(results)
 // console.log(players)
+const updateScores = async () => {
+  const players = await Player.find({})
+
+  players.forEach(p => (
+    updatePlayerScores(p)
+  ))
+  
+}
 
 
 app.get('/', (req, res) => {
@@ -37,6 +91,10 @@ app.get('/api/players', (req, res) => {
   Player.find({}).then(players => {
     res.json(players.map(p => p.toJSON()))
   })
+})
+
+app.get('/api/players/update', (req, res) => {
+
 })
 
 app.get('/api/results', (req, res) => {
