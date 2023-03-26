@@ -17,10 +17,6 @@ const playerSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    first_one: {
-        type: Number,
-        default: 99
-    },
     first_two: {
         type: Number,
         default: 99

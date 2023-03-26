@@ -25,12 +25,18 @@ app.use(cors())
 
 app.use(express.json())
 
-const calculateScore = (guess, actual, player) => {
+const calculateScore = (guess, actual, player, index) => {
   if (guess.h === actual.h && guess.a === actual.a) {
+    if (player.first_three > index) {
+      player.first_three = index
+    }
     player.threes += 1
     return 3
   } else if (guess.h > guess.a && actual.h > actual.a) {
     if (guess.h === actual.h || guess.a === actual.a) {
+      if (player.first_two > index) {
+        player.first_two = index
+      }
       player.twos += 1
       return 2
     }
@@ -38,6 +44,9 @@ const calculateScore = (guess, actual, player) => {
     return 1
   } else if (guess.h < guess.a && actual.h < actual.a) {
     if (guess.h === actual.h || guess.a === actual.a) {
+      if (player.first_two > index) {
+        player.first_two = index
+      }
       player.twos += 1
       return 2
     }
@@ -57,7 +66,7 @@ const updatePlayerScores = player => {
   results.forEach((r, index) => {
     if (!playerPoints[index]) {
       updated = true
-      playerPoints[index] = calculateScore(player.guesses[index], r, player)
+      playerPoints[index] = calculateScore(player.guesses[index], r, player, index)
     }
   })
   if (updated) {
@@ -73,15 +82,6 @@ const updatePlayerScores = player => {
 
 // console.log(results)
 // console.log(players)
-const updateScores = async () => {
-  const players = await Player.find({})
-
-  players.forEach(p => (
-    updatePlayerScores(p)
-  ))
-  
-}
-
 
 app.get('/', (req, res) => {
   res.send('<h1>Hello World!</h1>')
@@ -93,8 +93,14 @@ app.get('/api/players', (req, res) => {
   })
 })
 
-app.get('/api/players/update', (req, res) => {
+app.get('/api/players/update', async (req, res) => {
+  const players = await Player.find({})
 
+  players.forEach(p => (
+    updatePlayerScores(p)
+  ))
+
+  return players
 })
 
 app.get('/api/results', (req, res) => {
