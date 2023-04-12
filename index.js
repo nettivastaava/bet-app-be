@@ -78,6 +78,7 @@ const updatePlayerScores = player => {
       console.log('something went wrong')
     }
   }
+  return player
 }
 
 // console.log(results)
@@ -89,10 +90,10 @@ app.get('/', (req, res) => {
 
 app.get('/api/players', (req, res) => {
   Player.find({}).then(players => {
-    res.json(players.map(p => p.toJSON()))
+    res.json(players.map(p => updatePlayerScores(p)))
   })
 })
-
+/*
 app.get('/api/players/update', async (req, res) => {
   const players = await Player.find({})
 
@@ -102,7 +103,7 @@ app.get('/api/players/update', async (req, res) => {
 
   return players
 })
-
+*/
 app.get('/api/results', (req, res) => {
   res.json(results)
 })
@@ -117,7 +118,6 @@ app.post('/api/players', (request, response, next) => {
 
   newPlayer.save().then(result => {
     console.log('new player saved!')
-    mongoose.connection.close()
   }).catch(error => next(error))
 })
 
