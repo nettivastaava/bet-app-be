@@ -22,7 +22,7 @@ mongoose.connect(url)
   })
 
 app.use(cors())
-
+app.use(express.static('build'))
 app.use(express.json())
 
 const calculateScore = (guess, actual, player, index) => {
