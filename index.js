@@ -121,6 +121,15 @@ app.post('/api/players', (request, response, next) => {
   }).catch(error => next(error))
 })
 
+app.delete('/api/players/:id', (request, response, next) => {
+  Player.findByIdAndRemove(request.params.id)
+    .then(result => {
+      console.log('player deleted')
+      response.status(204).end()
+    })
+    .catch(error => next(error))
+})
+
 const PORT = 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
